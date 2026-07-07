@@ -83,7 +83,14 @@
     .product-info p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; max-height: 4.8em; overflow: hidden; }
     .product-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding: 0 18px; }
     .tag { background: var(--cream); color: var(--blue); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 6px 10px; }
-    .product-price { font-weight: 800; color: var(--orange-dark); font-size: 19px; padding: 12px 18px 18px; }
+    .product-price { font-weight: 800; color: var(--orange-dark); font-size: 19px; }
+    .product-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px 18px; margin-top: auto; }
+    .quick-toggle { position: relative; display: inline-block; width: 40px; height: 24px; flex-shrink: 0; cursor: pointer; }
+    .quick-toggle input { opacity: 0; width: 0; height: 0; }
+    .quick-toggle-slider { position: absolute; inset: 0; background: #d8cfc2; border-radius: 999px; transition: background .15s ease; }
+    .quick-toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform .15s ease; box-shadow: 0 1px 3px rgba(36,27,18,0.3); }
+    .quick-toggle input:checked + .quick-toggle-slider { background: var(--orange); }
+    .quick-toggle input:checked + .quick-toggle-slider::before { transform: translateX(16px); }
     .stores-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
     .store-card { border: 1px solid var(--line); border-radius: 18px; padding: 16px; background: #fff; display: flex; flex-direction: column; gap: 10px; }
     .store-card strong { font-size: 15px; }
@@ -125,7 +132,7 @@
     </header>
     <div class="tabs-intro">
       <h2>Dạ em mời anh/chị chọn bánh ạ 🍰</h2>
-      <p>Anh/chị ghé lấy ngay bánh <strong>có sẵn tại cửa hàng</strong>, hoặc đặt trước để em làm tươi mới và giao <strong>sau 3 tiếng</strong> nhé!</p>
+      <p>Anh/chị chọn danh mục <strong>bánh có sẵn tại cửa hàng</strong> hoặc <strong>bánh đặt trước</strong> nhé!</p>
     </div>
     <div class="tabs" role="tablist" aria-label="Chọn tab menu">
       <button class="tab" data-tab="pickup">Bánh có sẵn tại cửa hàng</button>
@@ -282,9 +289,17 @@
       }).map(category => `<section class="menu-section"><h3>${NHOM_ICON[category] || '🍰'} ${category}</h3><div class="product-grid">${grouped[category].map(product => {
             const imageUrl = product.img || '';
             const imgTag = imageUrl ? `<div class="product-image"><img src="${imageUrl}" alt="${product.ten}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'"></div>` : `<div class="product-image"><span>🍰</span></div>`;
-            return `<article class="product-card" data-product-id="${product.ma}">${imgTag}<div class="product-info"><h4>${product.ten}</h4><p>${product.mo_ta || product.loai || 'Không có mô tả'}</p></div><div class="product-meta"><span class="tag">${product.dvt || ''}</span><span class="tag">${product.loai || ''}</span></div><div class="product-price">${fmtVND(product.gia)}</div></article>`;
+            return `<article class="product-card" data-product-id="${product.ma}">${imgTag}<div class="product-info"><h4>${product.ten}</h4><p>${product.mo_ta || product.loai || 'Không có mô tả'}</p></div><div class="product-meta"><span class="tag">${product.dvt || ''}</span><span class="tag">${product.loai || ''}</span></div><div class="product-footer"><div class="product-price">${fmtVND(product.gia)}</div>${quickToggleHtml(product)}</div></article>`;
           }).join('')}</div></section>`).join('');
       container.innerHTML = sections;
+    }
+    function quickToggleHtml(product) {
+      if (!currentUser) return '';
+      const checked = currentUser.role === 'online'
+        ? product.visibility.pickup
+        : (product.stores?.[currentUser.storeId]?.pickup ?? true);
+      const scope = currentUser.role === 'online' ? 'global' : 'store';
+      return `<label class="quick-toggle" title="Bánh có sẵn tại cửa hàng" onclick="event.stopPropagation()"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="pickup" data-scope="${scope}" ${checked ? 'checked' : ''}><span class="quick-toggle-slider"></span></label>`;
     }
     function renderAdminPanel() {
       const panel = document.getElementById('adminPanel');
