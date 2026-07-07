@@ -88,6 +88,7 @@
     .product-price { font-weight: 800; color: var(--orange-dark); font-size: 19px; }
     .product-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px 18px; margin-top: auto; }
     .quick-toggle-group { display: flex; align-items: center; gap: 10px; }
+    .online-notice { margin-top: 14px; background: #fff4e0; border: 1px solid #f0c987; color: #7a5312; border-radius: 14px; padding: 12px 16px; font-size: 14px; text-align: center; }
     .quick-toggle { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
     .quick-toggle-switch { position: relative; display: inline-block; width: 34px; height: 20px; flex-shrink: 0; }
     .quick-toggle-switch input { opacity: 0; width: 0; height: 0; }
@@ -130,6 +131,7 @@
       <button class="tab" data-tab="order">Order bánh đặt trước</button>
     </div>
     <div class="store-select" id="storeSelect"></div>
+    <div class="online-notice" id="onlineNotice" hidden>⚠️ Tài khoản online: công tắc trên từng sản phẩm áp dụng cho <strong>toàn bộ 4 cửa hàng</strong> cùng lúc, không riêng cửa hàng nào.</div>
     <div class="layout">
       <aside class="sidebar">
         <h2>Danh mục</h2>
@@ -295,16 +297,16 @@
           }).join('')}</div></section>`).join('');
       container.innerHTML = sections;
     }
-    function miniToggle(product, channel, scope, checked, label) {
-      return `<label class="quick-toggle" title="${label}" onclick="event.stopPropagation()"><span class="quick-toggle-switch"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="${channel}" data-scope="${scope}" ${checked ? 'checked' : ''}><span class="quick-toggle-slider"></span></span><span class="quick-toggle-label">${label}</span></label>`;
+    function miniToggle(product, channel, scope, checked, label, tooltip) {
+      return `<label class="quick-toggle" title="${tooltip || label}" onclick="event.stopPropagation()"><span class="quick-toggle-switch"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="${channel}" data-scope="${scope}" ${checked ? 'checked' : ''}><span class="quick-toggle-slider"></span></span><span class="quick-toggle-label">${label}</span></label>`;
     }
     function quickToggleHtml(product) {
       if (!currentUser) return '';
       if (currentUser.role === 'online') {
-        return `<div class="quick-toggle-group">${miniToggle(product, 'order', 'global', product.visibility.order, 'Order')}${miniToggle(product, 'pickup', 'global', product.visibility.pickup, 'Có sẵn')}</div>`;
+        return `<div class="quick-toggle-group">${miniToggle(product, 'order', 'global', product.visibility.order, 'Order', 'Bật/tắt tab Order cho TOÀN BỘ hệ thống (cả 4 cửa hàng)')}${miniToggle(product, 'pickup', 'global', product.visibility.pickup, 'Có sẵn', 'Bật/tắt tab Có sẵn cho TOÀN BỘ hệ thống (cả 4 cửa hàng)')}</div>`;
       }
       const storePickup = product.stores?.[currentUser.storeId]?.pickup ?? true;
-      return `<div class="quick-toggle-group">${miniToggle(product, 'pickup', 'store', storePickup, 'Có sẵn')}</div>`;
+      return `<div class="quick-toggle-group">${miniToggle(product, 'pickup', 'store', storePickup, 'Có sẵn', `Chỉ áp dụng riêng cho ${currentUser.storeLabel}`)}</div>`;
     }
     function openProductModal(product) {
       const modal = document.getElementById('productModal');
@@ -333,6 +335,7 @@
     function updateSessionUi() {
       const badge = document.getElementById('sessionBadge');
       const logoutBtn = document.getElementById('logoutBtn');
+      const onlineNotice = document.getElementById('onlineNotice');
       if (currentUser) {
         badge.textContent = currentUser.role === 'online' ? 'Admin online' : `Quản lý ${currentUser.storeLabel}`;
         badge.hidden = false;
@@ -342,6 +345,7 @@
         badge.hidden = true;
         logoutBtn.hidden = true;
       }
+      onlineNotice.hidden = currentUser?.role !== 'online';
     }
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.tab').forEach(button => button.addEventListener('click', () => {
