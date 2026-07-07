@@ -236,16 +236,15 @@
       if (!currentUser) { panel.hidden = true; panel.innerHTML = ''; return; }
       const state = loadState();
       const title = currentUser.role === 'online' ? 'Quản lý toàn hệ thống' : `Quản lý ${currentUser.storeLabel}`;
-      const intro = currentUser.role === 'online' ? 'Bạn có thể bật/tắt sản phẩm cho toàn bộ menu.' : 'Bạn có thể bật/tắt sản phẩm cho cửa hàng của mình.';
+      const intro = currentUser.role === 'online' ? 'Bạn có thể bật/tắt sản phẩm cho toàn bộ menu (cả tab Order và tab Có sẵn tại cửa hàng).' : 'Bạn có thể bật/tắt sản phẩm có sẵn tại cửa hàng của mình.';
       const items = state.products.map(product => {
         const globalOrder = product.visibility.order;
         const globalPickup = product.visibility.pickup;
-        const storeOrder = product.stores?.[currentUser.storeId]?.order ?? true;
         const storePickup = product.stores?.[currentUser.storeId]?.pickup ?? true;
         if (currentUser.role === 'online') {
           return `<div class="admin-item"><div><strong>${product.ten}</strong><small>${product.nhom}</small></div><div class="switches"><label class="switch-row"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="order" data-scope="global" ${globalOrder ? 'checked' : ''}>Tab Order</label><label class="switch-row"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="pickup" data-scope="global" ${globalPickup ? 'checked' : ''}>Tab Có sẵn</label></div></div>`;
         }
-        return `<div class="admin-item"><div><strong>${product.ten}</strong><small>${product.nhom}</small></div><div class="switches"><label class="switch-row"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="order" data-scope="store" ${storeOrder ? 'checked' : ''}>Tab Order</label><label class="switch-row"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="pickup" data-scope="store" ${storePickup ? 'checked' : ''}>Tab Có sẵn</label></div></div>`;
+        return `<div class="admin-item"><div><strong>${product.ten}</strong><small>${product.nhom}</small></div><div class="switches"><label class="switch-row"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="pickup" data-scope="store" ${storePickup ? 'checked' : ''}>Bánh có sẵn tại cửa hàng</label></div></div>`;
       }).join('');
       panel.hidden = false;
       panel.innerHTML = `<h2>${title}</h2><p>${intro}</p><div class="admin-list">${items}</div>`;
