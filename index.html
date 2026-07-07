@@ -23,7 +23,7 @@
     button, input { font: inherit; }
     .page { max-width: 1800px; margin: 0 auto; padding: 24px 32px 60px; }
     .cover-wrap { position: relative; margin-bottom: 20px; }
-    .cover-banner { width: 100%; aspect-ratio: 21 / 7; border-radius: 24px; overflow: hidden; box-shadow: 0 14px 32px rgba(36,27,18,0.08); }
+    .cover-banner { width: 100%; aspect-ratio: 21 / 8; max-height: 380px; border-radius: 24px; overflow: hidden; box-shadow: 0 14px 32px rgba(36,27,18,0.08); }
     .cover-banner img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .top-actions { position: absolute; top: 14px; right: 14px; display: flex; align-items: center; gap: 8px; z-index: 2; }
     .hero { background: linear-gradient(135deg, #fff9f1 0%, var(--cream) 100%); border: 1px solid var(--line); border-radius: 24px; padding: 24px; box-shadow: 0 14px 32px rgba(36,27,18,0.06); }
@@ -135,8 +135,8 @@
       <p>Anh/chị chọn danh mục <strong>bánh có sẵn tại cửa hàng</strong> hoặc <strong>bánh đặt trước</strong> nhé!</p>
     </div>
     <div class="tabs" role="tablist" aria-label="Chọn tab menu">
-      <button class="tab" data-tab="pickup">Bánh có sẵn tại cửa hàng</button>
-      <button class="tab active" data-tab="order">Order bánh nhận sau 3 tiếng</button>
+      <button class="tab active" data-tab="pickup">Bánh có sẵn tại cửa hàng</button>
+      <button class="tab" data-tab="order">Order bánh đặt trước</button>
     </div>
     <div class="store-select" id="storeSelect"></div>
     <div class="layout">
@@ -183,7 +183,7 @@
       online: { password: 'online@123', role: 'online' }
     };
     const STORAGE_KEY = 'cakeLabMenuStateV2';
-    let currentTab = 'order';
+    let currentTab = 'pickup';
     let currentStore = null;
     let currentUser = null;
     function ensureVisibility(product) {
