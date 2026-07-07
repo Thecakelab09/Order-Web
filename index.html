@@ -22,15 +22,15 @@
     a { color: inherit; text-decoration: none; }
     button, input { font: inherit; }
     .page { max-width: 1800px; margin: 0 auto; padding: 24px 32px 60px; }
-    .cover-banner { width: 100%; aspect-ratio: 21 / 7; border-radius: 24px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 14px 32px rgba(36,27,18,0.08); }
+    .cover-wrap { position: relative; margin-bottom: 20px; }
+    .cover-banner { width: 100%; aspect-ratio: 21 / 7; border-radius: 24px; overflow: hidden; box-shadow: 0 14px 32px rgba(36,27,18,0.08); }
     .cover-banner img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .hero { background: linear-gradient(135deg, #fff9f1 0%, var(--cream) 100%); border: 1px solid var(--line); border-radius: 24px; padding: 24px; box-shadow: 0 14px 32px rgba(36,27,18,0.06); display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; }
+    .top-actions { position: absolute; top: 14px; right: 14px; display: flex; align-items: center; gap: 8px; z-index: 2; }
+    .hero { background: linear-gradient(135deg, #fff9f1 0%, var(--cream) 100%); border: 1px solid var(--line); border-radius: 24px; padding: 24px; box-shadow: 0 14px 32px rgba(36,27,18,0.06); }
     .brand { display: flex; align-items: center; gap: 16px; }
     .brand-logo { width: 64px; height: 64px; border-radius: 16px; object-fit: cover; flex-shrink: 0; }
-    .brand h1 { margin: 0 0 6px; font-size: 28px; }
-    .brand p { margin: 0; color: var(--muted); max-width: 740px; line-height: 1.65; }
-    .header-actions { display: flex; align-items: center; gap: 8px; justify-content: end; }
-    .pill, .ghost-btn, .primary-btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 6px 12px; font-weight: 700; border: 1px solid var(--line); font-size: 13px; }
+    .brand h1 { margin: 0; font-size: 28px; }
+    .pill, .ghost-btn, .primary-btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 6px 12px; font-weight: 700; border: 1px solid var(--line); font-size: 13px; box-shadow: 0 4px 14px rgba(36,27,18,0.18); }
     .pill { background: #fff; color: var(--blue); }
     .ghost-btn { background: #fff; }
     .primary-btn { background: var(--orange); color: #fff; border-color: var(--orange); }
@@ -100,19 +100,18 @@
 </head>
 <body>
   <div class="page">
-    <div class="cover-banner"><img src="banner.jpg" alt="The Cake Lab"></div>
+    <div class="cover-wrap">
+      <div class="cover-banner"><img src="banner.jpg" alt="The Cake Lab"></div>
+      <div class="top-actions">
+        <span class="pill" id="sessionBadge" hidden></span>
+        <a class="ghost-btn" href="login.html">Đăng nhập quản lý</a>
+        <button class="primary-btn" id="logoutBtn" hidden>Đăng xuất</button>
+      </div>
+    </div>
     <header class="hero">
       <div class="brand">
         <img class="brand-logo" src="logo.jpg" alt="Logo The Cake Lab">
-        <div>
-          <h1>The Cake Lab</h1>
-          <p>Giao diện mới nhưng giữ nguyên menu cũ với dữ liệu sản phẩm, ảnh và mô tả như trước.</p>
-        </div>
-      </div>
-      <div class="header-actions">
-        <span class="pill" id="sessionBadge">Khách xem menu</span>
-        <a class="ghost-btn" href="login.html">Đăng nhập quản lý</a>
-        <button class="primary-btn" id="logoutBtn" hidden>Đăng xuất</button>
+        <h1>The Cake Lab</h1>
       </div>
     </header>
     <div class="tabs-intro">
@@ -316,9 +315,11 @@
       const logoutBtn = document.getElementById('logoutBtn');
       if (currentUser) {
         badge.textContent = currentUser.role === 'online' ? 'Admin online' : `Quản lý ${currentUser.storeLabel}`;
+        badge.hidden = false;
         logoutBtn.hidden = false;
       } else {
-        badge.textContent = 'Khách xem menu';
+        badge.textContent = '';
+        badge.hidden = true;
         logoutBtn.hidden = true;
       }
     }
