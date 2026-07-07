@@ -70,6 +70,11 @@
     .modal-body h3 { margin: 0; font-size: 24px; }
     .modal-body .product-price { padding: 0; font-size: 22px; }
     .modal-body .modal-desc { color: var(--muted); font-size: 15px; line-height: 1.7; white-space: pre-line; }
+    .modal-stores { border-top: 1px solid var(--line); padding-top: 14px; }
+    .modal-stores .modal-stores-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; display: block; }
+    .modal-stores .store-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .modal-stores .store-tag { background: var(--cream); color: var(--blue); font-size: 13px; font-weight: 700; border-radius: 999px; padding: 6px 12px; }
+    .modal-stores .store-tag.unavailable { color: var(--muted); }
     @media (max-width: 720px) { .modal-card { grid-template-columns: 1fr; max-height: 92vh; } .modal-image { max-height: 40vh; } }
     .product-image { width: 100%; height: 260px; flex: 0 0 260px; background: var(--cream-2); display: flex; align-items: center; justify-content: center; font-size: 48px; }
     .product-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -142,6 +147,7 @@
         <div class="product-price" id="modalPrice"></div>
         <div class="product-meta" id="modalMeta"></div>
         <div class="modal-desc" id="modalDesc"></div>
+        <div class="modal-stores" id="modalStores"></div>
       </div>
     </div>
   </div>
@@ -305,6 +311,15 @@
       document.getElementById('modalPrice').textContent = fmtVND(product.gia);
       document.getElementById('modalMeta').innerHTML = `<span class="tag">${product.dvt || ''}</span><span class="tag">${product.loai || ''}</span><span class="tag">${product.nhom || ''}</span>`;
       document.getElementById('modalDesc').textContent = product.mo_ta || 'Không có mô tả thành phần.';
+      const availableStores = STORE_LIST.filter(store => product.stores?.[store.id]?.pickup);
+      const storesEl = document.getElementById('modalStores');
+      if (!product.visibility?.pickup) {
+        storesEl.innerHTML = '';
+      } else if (availableStores.length) {
+        storesEl.innerHTML = `<span class="modal-stores-title">Đang có sẵn tại:</span><div class="store-tags">${availableStores.map(store => `<span class="store-tag">${store.label}</span>`).join('')}</div>`;
+      } else {
+        storesEl.innerHTML = `<span class="modal-stores-title">Đang có sẵn tại:</span><div class="store-tags"><span class="store-tag unavailable">Hiện chưa có sẵn tại cửa hàng nào</span></div>`;
+      }
       modal.hidden = false;
     }
     function closeProductModal() {
