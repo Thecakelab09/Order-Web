@@ -59,8 +59,10 @@
     .menu-section { background: #fff; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
     .menu-section h3 { margin: 0; padding: 18px 20px; font-size: 18px; border-bottom: 1px solid var(--line); }
     .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; padding: 22px; }
-    .product-card { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: #fff; cursor: pointer; transition: box-shadow .15s ease, transform .15s ease; }
+    .product-card { position: relative; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: #fff; cursor: pointer; transition: box-shadow .15s ease, transform .15s ease; }
     .product-card:hover { box-shadow: 0 12px 26px rgba(36,27,18,0.12); transform: translateY(-2px); }
+    .product-card.is-off { opacity: 0.55; }
+    .off-badge { position: absolute; top: 10px; left: 10px; z-index: 1; background: rgba(36,27,18,0.75); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(36,27,18,0.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
     .modal-card { background: #fff; border-radius: 24px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; position: relative; }
     .modal-close { position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: 18px; font-weight: 700; cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center; z-index: 1; }
@@ -222,13 +224,23 @@
       const query = document.getElementById('searchInput').value.trim().toLowerCase();
       const selectedCategory = document.querySelector('.category-item.active')?.dataset.category;
       return state.products.filter(product => {
-        if (!product.visibility?.[currentTab]) return false;
-        if (currentTab === 'pickup' && currentStore && !product.stores?.[currentStore]?.pickup) return false;
+        if (!currentUser) {
+          if (!product.visibility?.[currentTab]) return false;
+          if (currentTab === 'pickup' && currentStore && !product.stores?.[currentStore]?.pickup) return false;
+        }
         const text = `${product.ten} ${product.mo_ta} ${product.loai} ${product.nhom}`.toLowerCase();
         if (query && !text.includes(query)) return false;
         if (selectedCategory && selectedCategory !== 'all' && categoryOf(product) !== selectedCategory) return false;
         return true;
       });
+    }
+    function isProductOff(product) {
+      if (!currentUser) return false;
+      if (currentUser.role === 'online') {
+        return currentTab === 'order' ? !product.visibility.order : !product.visibility.pickup;
+      }
+      if (currentTab !== 'pickup') return false;
+      return !(product.stores?.[currentUser.storeId]?.pickup ?? true);
     }
     function renderCategories() {
       const list = document.getElementById('categoryList');
@@ -276,8 +288,10 @@
         return a.localeCompare(b,'vi');
       }).map(category => `<section class="menu-section"><h3>${NHOM_ICON[category] || '🍰'} ${category}</h3><div class="product-grid">${grouped[category].map(product => {
             const imageUrl = product.img || '';
+            const off = isProductOff(product);
             const imgTag = imageUrl ? `<div class="product-image"><img src="${imageUrl}" alt="${product.ten}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'"></div>` : `<div class="product-image"><span>🍰</span></div>`;
-            return `<article class="product-card" data-product-id="${product.ma}">${imgTag}<div class="product-info"><h4>${product.ten}</h4><p>${product.mo_ta || product.loai || 'Không có mô tả'}</p></div><div class="product-meta"><span class="tag">${product.dvt || ''}</span><span class="tag">${product.loai || ''}</span></div><div class="product-footer"><div class="product-price">${fmtVND(product.gia)}</div>${quickToggleHtml(product)}</div></article>`;
+            const offBadge = off ? '<span class="off-badge">Đang tắt</span>' : '';
+            return `<article class="product-card${off ? ' is-off' : ''}" data-product-id="${product.ma}">${offBadge}${imgTag}<div class="product-info"><h4>${product.ten}</h4><p>${product.mo_ta || product.loai || 'Không có mô tả'}</p></div><div class="product-meta"><span class="tag">${product.dvt || ''}</span><span class="tag">${product.loai || ''}</span></div><div class="product-footer"><div class="product-price">${fmtVND(product.gia)}</div>${quickToggleHtml(product)}</div></article>`;
           }).join('')}</div></section>`).join('');
       container.innerHTML = sections;
     }
