@@ -92,6 +92,10 @@
     .admin-panel { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 20px; margin-top: 24px; }
     .admin-panel h2 { margin: 0 0 10px; }
     .admin-panel p { margin: 0 0 18px; color: var(--muted); }
+    .admin-section { margin-top: 22px; }
+    .admin-section:first-of-type { margin-top: 4px; }
+    .admin-section h3 { margin: 0 0 12px; font-size: 16px; display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+    .admin-section-count { margin-left: auto; color: var(--muted); font-weight: 700; font-size: 13px; }
     .admin-list { display: grid; gap: 12px; }
     .admin-item { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 14px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--cream); }
     .admin-item strong { display: block; margin-bottom: 4px; }
@@ -289,17 +293,26 @@
       const state = loadState();
       const title = currentUser.role === 'online' ? 'Quản lý toàn hệ thống' : `Quản lý ${currentUser.storeLabel}`;
       const intro = currentUser.role === 'online' ? 'Bạn có thể bật/tắt sản phẩm cho toàn bộ menu (cả tab Order và tab Có sẵn tại cửa hàng).' : 'Bạn có thể bật/tắt sản phẩm có sẵn tại cửa hàng của mình.';
-      const items = state.products.map(product => {
-        const globalOrder = product.visibility.order;
-        const globalPickup = product.visibility.pickup;
-        const storePickup = product.stores?.[currentUser.storeId]?.pickup ?? true;
-        if (currentUser.role === 'online') {
-          return `<div class="admin-item"><div><strong>${product.ten}</strong><small>${product.nhom}</small></div><div class="switches"><label class="switch-row"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="order" data-scope="global" ${globalOrder ? 'checked' : ''}>Tab Order</label><label class="switch-row"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="pickup" data-scope="global" ${globalPickup ? 'checked' : ''}>Tab Có sẵn</label></div></div>`;
-        }
-        return `<div class="admin-item"><div><strong>${product.ten}</strong><small>${product.nhom}</small></div><div class="switches"><label class="switch-row"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="pickup" data-scope="store" ${storePickup ? 'checked' : ''}>Bánh có sẵn tại cửa hàng</label></div></div>`;
+      const grouped = {};
+      state.products.forEach(p => { const key = categoryOf(p); grouped[key] = grouped[key] || []; grouped[key].push(p); });
+      const sections = Object.keys(grouped).sort((a, b) => {
+        const ia = NHOM_ORDER.indexOf(a); const ib = NHOM_ORDER.indexOf(b);
+        if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+        return a.localeCompare(b, 'vi');
+      }).map(category => {
+        const items = grouped[category].map(product => {
+          const globalOrder = product.visibility.order;
+          const globalPickup = product.visibility.pickup;
+          const storePickup = product.stores?.[currentUser.storeId]?.pickup ?? true;
+          if (currentUser.role === 'online') {
+            return `<div class="admin-item"><div><strong>${product.ten}</strong></div><div class="switches"><label class="switch-row"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="order" data-scope="global" ${globalOrder ? 'checked' : ''}>Tab Order</label><label class="switch-row"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="pickup" data-scope="global" ${globalPickup ? 'checked' : ''}>Tab Có sẵn</label></div></div>`;
+          }
+          return `<div class="admin-item"><div><strong>${product.ten}</strong></div><div class="switches"><label class="switch-row"><input class="toggle-input" type="checkbox" data-product-id="${product.ma}" data-channel="pickup" data-scope="store" ${storePickup ? 'checked' : ''}>Bánh có sẵn tại cửa hàng</label></div></div>`;
+        }).join('');
+        return `<section class="admin-section"><h3>${NHOM_ICON[category] || '🍰'} ${category} <span class="admin-section-count">${grouped[category].length}</span></h3><div class="admin-list">${items}</div></section>`;
       }).join('');
       panel.hidden = false;
-      panel.innerHTML = `<h2>${title}</h2><p>${intro}</p><div class="admin-list">${items}</div>`;
+      panel.innerHTML = `<h2>${title}</h2><p>${intro}</p>${sections}`;
     }
     function openProductModal(product) {
       const modal = document.getElementById('productModal');
