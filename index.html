@@ -246,8 +246,8 @@
     }
     function openMessenger(product) {
       const message = currentTab === 'order'
-        ? `Mình muốn đặt trước bánh này ạ: ${product.ten} - ${fmtVND(product.gia)}. Shop tư vấn giúp mình về thời gian nhận bánh nhé!`
-        : `Mình chọn bánh này ạ: ${product.ten} - ${fmtVND(product.gia)}. Shop tư vấn giúp mình với nhé!`;
+        ? `Chào The Cake Lab, tôi muốn đặt trước sản phẩm: ${product.ten} - ${fmtVND(product.gia)}. Shop tư vấn về thời gian nhận bánh nhé`
+        : `Chào The Cake Lab, tôi muốn hỏi về sản phẩm: ${product.ten} - ${fmtVND(product.gia)}.`;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(message).catch(() => {});
       }
