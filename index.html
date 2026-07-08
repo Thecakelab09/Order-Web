@@ -245,7 +245,9 @@
       }, 4000);
     }
     function openMessenger(product) {
-      const message = `Chào The Cake Lab, tôi muốn hỏi về sản phẩm: ${product.ten} - ${fmtVND(product.gia)}. Nhờ shop tư vấn giúp tôi ạ!`;
+      const message = currentTab === 'order'
+        ? `Chào The Cake Lab, tôi muốn đặt trước sản phẩm: ${product.ten} - ${fmtVND(product.gia)}. Nhờ shop tư vấn giúp tôi về thời gian nhận bánh ạ!`
+        : `Chào The Cake Lab, tôi muốn hỏi về sản phẩm: ${product.ten} - ${fmtVND(product.gia)}. Nhờ shop tư vấn giúp tôi ạ!`;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(message).catch(() => {});
       }
