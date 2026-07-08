@@ -74,6 +74,8 @@
     .modal-body .modal-desc { color: var(--muted); font-size: 15px; line-height: 1.7; white-space: pre-line; }
     .messenger-cta { display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: none; border-radius: 999px; padding: 12px 18px; background: linear-gradient(135deg, #00B2FF, #006AFF 45%, #A033FF 75%, #FF5CA1); color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
     .messenger-cta .messenger-btn-icon svg { width: 20px; height: 20px; fill: #fff; display: block; }
+    .messenger-hint { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5; text-align: center; }
+    .messenger-hint strong { color: var(--ink); }
     .messenger-btn { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #00B2FF, #006AFF 45%, #A033FF 75%, #FF5CA1); box-shadow: 0 3px 10px rgba(36,27,18,0.3); cursor: pointer; z-index: 1; }
     .messenger-btn svg { width: 18px; height: 18px; fill: #fff; }
     .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px); background: var(--ink); color: #fff; padding: 14px 20px; border-radius: 14px; font-size: 14px; font-weight: 700; box-shadow: 0 12px 30px rgba(0,0,0,0.25); z-index: 200; opacity: 0; transition: opacity .2s ease, transform .2s ease; max-width: 90vw; text-align: center; }
@@ -159,6 +161,7 @@
           <span class="messenger-btn-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.026 2C6.508 2 2.027 6.15 2.027 11.339c0 2.956 1.45 5.59 3.72 7.32V23l3.396-1.868c.905.25 1.869.386 2.883.386 5.518 0 9.999-4.15 9.999-9.339S17.544 2 12.026 2zm.995 12.581l-2.55-2.72-4.972 2.72 5.467-5.804 2.612 2.72 4.907-2.72-5.464 5.804z"/></svg></span>
           Nhắn tin đặt bánh này qua Messenger
         </button>
+        <p class="messenger-hint">📋 Bấm nút sẽ mở Messenger, tin nhắn hỏi mua bánh này đã được copy sẵn — bạn chỉ cần <strong>dán (Ctrl+V hoặc Cmd+V)</strong> vào khung chat rồi gửi nhé!</p>
         <div class="product-meta" id="modalMeta"></div>
         <div class="modal-desc" id="modalDesc"></div>
         <div class="modal-stores" id="modalStores"></div>
