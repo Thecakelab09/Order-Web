@@ -113,6 +113,23 @@
     .empty-state { padding: 24px; text-align: center; color: var(--muted); background: #fff; border-radius: 18px; border: 1px dashed var(--line); }
     @media (max-width: 980px) { .hero { grid-template-columns: 1fr; } .layout { grid-template-columns: 1fr; } .sidebar { position: static; top: auto; } .stores-grid { grid-template-columns: 1fr; } .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; padding: 14px; } .product-image { height: 180px; flex-basis: 180px; } }
   </style>
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1027531836416723');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1027531836416723&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
 </head>
 <body>
   <div class="page">
@@ -250,6 +267,11 @@
         : `Chào The Cake Lab, tôi muốn hỏi về sản phẩm: ${product.ten} - ${fmtVND(product.gia)}.`;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(message).catch(() => {});
+      }
+      if (typeof fbq === 'function') {
+        const eventParams = { content_name: product.ten, content_ids: [product.ma], content_type: 'product', value: product.gia, currency: 'VND', tab: currentTab };
+        fbq('track', 'Contact', eventParams);
+        fbq('trackCustom', 'MessengerClick', eventParams);
       }
       showToast('The Cake Lab đã sao chép sẵn nội dung tin nhắn giúp Anh/Chị — chỉ cần dán vào khung chat Messenger và gửi là xong ạ! 📋');
       window.open(`https://m.me/${MESSENGER_USERNAME}?ref=${encodeURIComponent(product.ma)}`, '_blank', 'noopener');
