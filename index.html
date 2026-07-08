@@ -76,6 +76,8 @@
     .messenger-cta .messenger-btn-icon svg { width: 20px; height: 20px; fill: #fff; display: block; }
     .messenger-btn { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #00B2FF, #006AFF 45%, #A033FF 75%, #FF5CA1); box-shadow: 0 3px 10px rgba(36,27,18,0.3); cursor: pointer; z-index: 1; }
     .messenger-btn svg { width: 18px; height: 18px; fill: #fff; }
+    .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px); background: var(--ink); color: #fff; padding: 14px 20px; border-radius: 14px; font-size: 14px; font-weight: 700; box-shadow: 0 12px 30px rgba(0,0,0,0.25); z-index: 200; opacity: 0; transition: opacity .2s ease, transform .2s ease; max-width: 90vw; text-align: center; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     .modal-stores { border-top: 1px solid var(--line); padding-top: 14px; }
     .modal-stores .modal-stores-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; display: block; }
     .modal-stores .store-tags { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -145,6 +147,7 @@
       <main class="menu-content" id="menuContent"></main>
     </div>
   </div>
+  <div class="toast" id="toast" hidden></div>
   <div class="modal-overlay" id="productModal" hidden>
     <div class="modal-card">
       <button class="modal-close" id="modalClose" aria-label="Đóng">✕</button>
@@ -226,11 +229,24 @@
     function messengerButtonHtml(product) {
       return `<button type="button" class="messenger-btn" title="Nhắn tin Messenger" data-product-id="${product.ma}">${MESSENGER_ICON_SVG}</button>`;
     }
+    let toastTimer = null;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.hidden = false;
+      requestAnimationFrame(() => toast.classList.add('show'));
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => { toast.hidden = true; }, 250);
+      }, 4000);
+    }
     function openMessenger(product) {
       const message = `Chào The Cake Lab, mình muốn hỏi về sản phẩm: ${product.ten} - ${fmtVND(product.gia)}. Bạn tư vấn giúp mình nhé!`;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(message).catch(() => {});
       }
+      showToast('Đã copy sẵn tin nhắn — dán vào khung chat Messenger để gửi nhé! 📋');
       window.open(`https://m.me/${MESSENGER_USERNAME}?ref=${encodeURIComponent(product.ma)}`, '_blank', 'noopener');
     }
     function getCategories(products) {
