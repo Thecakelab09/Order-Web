@@ -261,6 +261,16 @@
       if (field !== '' || row.length) { row.push(field); rows.push(row); }
       return rows;
     }
+    function normalizeDriveImg(raw) {
+      const url = (raw || '').trim();
+      if (!url) return '';
+      const fileViewMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (fileViewMatch) return `https://drive.google.com/thumbnail?id=${fileViewMatch[1]}&sz=w800`;
+      const openMatch = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
+      if (openMatch) return `https://drive.google.com/thumbnail?id=${openMatch[1]}&sz=w800`;
+      if (/^https?:\/\//.test(url)) return url;
+      return '';
+    }
     function rowsToProducts(rows) {
       return rows.slice(1).filter(r => (r[0] || '').trim()).map(r => {
         const cs1 = (r[13] || '').trim().toUpperCase() === 'TRUE';
@@ -275,7 +285,7 @@
           dvt: r[6] || '',
           nhom: r[7] || '',
           loai: r[8] || '',
-          img: r[10] || '',
+          img: normalizeDriveImg(r[10]),
           stores: { CS1: { pickup: cs1 }, CS2: { pickup: cs2 }, CS4: { pickup: cs4 } },
           visibility: { order: online, pickup: cs1 || cs2 || cs4 }
         };
