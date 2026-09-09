@@ -418,7 +418,26 @@
       const products = getFilteredProducts();
       const container = document.getElementById('menuContent');
       if (!products.length) {
-        container.innerHTML = '<div class="empty-state">Không có sản phẩm phù hợp trong tab này.</div>';
+        const otherTab = currentTab === 'pickup' ? 'order' : 'pickup';
+        const otherTabLabel = otherTab === 'order' ? 'Order bánh đặt trước' : 'Bánh có sẵn tại cửa hàng';
+        const selectedCategory = document.querySelector('.category-item.active')?.dataset.category;
+        const hasInOtherTab = PRODUCTS_CACHE.some(p => {
+          if (!p.visibility?.[otherTab]) return false;
+          if (selectedCategory && selectedCategory !== 'all' && categoryOf(p) !== selectedCategory) return false;
+          return true;
+        });
+        const switchHint = hasInOtherTab
+          ? `<div style="margin-top:10px">Danh mục này đang có ở tab <strong>${otherTabLabel}</strong>. <button type="button" class="ghost-btn" id="switchTabHint" style="margin-top:8px">Chuyển sang ${otherTabLabel}</button></div>`
+          : '';
+        container.innerHTML = `<div class="empty-state">Không có sản phẩm phù hợp trong tab này.${switchHint}</div>`;
+        const hintBtn = document.getElementById('switchTabHint');
+        if (hintBtn) hintBtn.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach(item => item.classList.toggle('active', item.dataset.tab === otherTab));
+          currentTab = otherTab;
+          currentStore = null;
+          renderStoreSelect();
+          renderMenu();
+        });
         return;
       }
       const grouped = {};
