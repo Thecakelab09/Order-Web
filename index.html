@@ -296,7 +296,7 @@
     const NHOM_ICON = {"BÁNH KEM SINH NHẬT":"🎁","BÁNH KEM NHỎ":"🎂","BÁNH MÌ":"🥐","BÁNH QUY":"🍪"};
     const CATEGORY_MERGE = { "ĐỒ ĂN KÈM": "BÁNH MÌ" };
     function categoryOf(product) { const key = product.nhom || 'Khác'; return CATEGORY_MERGE[key] || key; }
-    function isSize12(product) { return /(^|\s)12$/.test((product.ten || '').trim()); }
+    function isSizeCouple(product) { return /size\s*couple/i.test(product.ten || ''); }
     const BEST_SELLER_CODES = ['10101086', '10101001', '10101007', '10101082', '10101090'];
     function isBestSeller(product) { return BEST_SELLER_CODES.indexOf(product.ma) !== -1; }
     const PUSH_TO_BOTTOM_CODES = ['10101078'];
@@ -419,7 +419,7 @@
       if (grouped['BÁNH KEM SINH NHẬT']) {
         const bsnTier = (p) => {
           if (isBestSeller(p)) return 0;
-          if (isSize12(p)) return 3;
+          if (isSizeCouple(p)) return 3;
           if (isPushedToBottom(p)) return 2;
           return 1;
         };
