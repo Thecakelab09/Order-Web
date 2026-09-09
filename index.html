@@ -84,6 +84,9 @@
     .messenger-hint { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5; text-align: center; }
     .messenger-hint strong { color: var(--ink); }
     .messenger-btn { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #00B2FF, #006AFF 45%, #A033FF 75%, #FF5CA1); box-shadow: 0 3px 10px rgba(36,27,18,0.3); cursor: pointer; z-index: 1; }
+    .messenger-btn.contact-btn { position: static; width: auto; height: auto; border-radius: 999px; padding: 8px 14px; gap: 6px; box-shadow: 0 3px 10px rgba(36,27,18,0.2); }
+    .messenger-btn.contact-btn svg { width: 16px; height: 16px; fill: #fff; }
+    .messenger-btn.contact-btn span { color: #fff; font-size: 13px; font-weight: 700; }
     .messenger-btn svg { width: 18px; height: 18px; fill: #fff; }
     .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px); background: var(--ink); color: #fff; padding: 14px 20px; border-radius: 14px; font-size: 14px; font-weight: 700; box-shadow: 0 12px 30px rgba(0,0,0,0.25); z-index: 200; opacity: 0; transition: opacity .2s ease, transform .2s ease; max-width: 90vw; text-align: center; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -332,6 +335,9 @@
     function messengerButtonHtml(product) {
       return `<button type="button" class="messenger-btn" title="Nhắn tin Messenger" data-product-id="${product.ma}">${MESSENGER_ICON_SVG}</button>`;
     }
+    function contactMessengerBtnHtml(product) {
+      return `<button type="button" class="messenger-btn contact-btn" data-product-id="${product.ma}">${MESSENGER_ICON_SVG}<span>Nhắn tin</span></button>`;
+    }
     let toastTimer = null;
     function showToast(message) {
       const toast = document.getElementById('toast');
@@ -434,7 +440,7 @@
             const imageUrl = product.img || '';
             const imgTag = imageUrl ? `<div class="product-image"><img src="${imageUrl}" alt="${product.ten}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'"></div>` : `<div class="product-image"><span>🍰</span></div>`;
             const badges = `<div class="card-badges">${isBestSeller(product) ? '<span class="badge bestseller-badge">⭐ Best Seller</span>' : ''}</div>`;
-            return `<article class="product-card" data-product-id="${product.ma}">${badges}${messengerButtonHtml(product)}${imgTag}<div class="product-info"><h4>${product.ten}</h4><p>${product.mo_ta || product.loai || 'Không có mô tả'}</p></div><div class="product-meta"><span class="tag">${product.dvt || ''}</span><span class="tag">${product.loai || ''}</span></div><div class="product-footer"><div class="product-price">${fmtVND(product.gia)}</div></div></article>`;
+            return `<article class="product-card" data-product-id="${product.ma}">${badges}${messengerButtonHtml(product)}${imgTag}<div class="product-info"><h4>${product.ten}</h4><p>${product.mo_ta || product.loai || 'Không có mô tả'}</p></div><div class="product-meta"><span class="tag">${product.dvt || ''}</span><span class="tag">${product.loai || ''}</span></div><div class="product-footer"><div class="product-price">${fmtVND(product.gia)}</div>${product.gia === 0 ? contactMessengerBtnHtml(product) : ''}</div></article>`;
           }).join('')}</div></section>`).join('');
       container.innerHTML = sections;
     }
