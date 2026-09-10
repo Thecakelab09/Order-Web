@@ -303,7 +303,7 @@
     function isSizeCouple(product) { return /size\s*couple/i.test(product.ten || ''); }
     const BEST_SELLER_CODES = ['10101086', '10101001', '10101007', '10101082', '10101090'];
     function isBestSeller(product) { return BEST_SELLER_CODES.indexOf(product.ma) !== -1; }
-    const PUSH_TO_BOTTOM_CODES = ['10101078'];
+    const PUSH_TO_BOTTOM_CODES = ['10101078', '10401006', '10401009', '10401007'];
     function isPushedToBottom(product) { return PUSH_TO_BOTTOM_CODES.indexOf(product.ma) !== -1; }
     const STORE_LIST = [
       { id: 'CS1', label: 'CS1 — Tuệ Tĩnh' },
@@ -451,6 +451,10 @@
         };
         grouped['BÁNH KEM SINH NHẬT'] = grouped['BÁNH KEM SINH NHẬT'].slice().sort((a, b) => bsnTier(a) - bsnTier(b));
       }
+      Object.keys(grouped).forEach(category => {
+        if (category === 'BÁNH KEM SINH NHẬT') return;
+        grouped[category] = grouped[category].slice().sort((a, b) => (isPushedToBottom(a) ? 1 : 0) - (isPushedToBottom(b) ? 1 : 0));
+      });
       const sections = Object.keys(grouped).sort((a,b) => {
         const ia = NHOM_ORDER.indexOf(a); const ib = NHOM_ORDER.indexOf(b);
         if (ia !== -1 || ib !== -1) return (ia===-1?99:ia) - (ib===-1?99:ib);
