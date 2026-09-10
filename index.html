@@ -264,13 +264,16 @@
       if (field !== '' || row.length) { row.push(field); rows.push(row); }
       return rows;
     }
+    const IMG_CACHE_BUST = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     function normalizeDriveImg(raw) {
       const url = (raw || '').trim();
       if (!url) return '';
       const fileViewMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-      if (fileViewMatch) return `https://drive.google.com/thumbnail?id=${fileViewMatch[1]}&sz=w800`;
+      if (fileViewMatch) return `https://drive.google.com/thumbnail?id=${fileViewMatch[1]}&sz=w800&v=${IMG_CACHE_BUST}`;
       const openMatch = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
-      if (openMatch) return `https://drive.google.com/thumbnail?id=${openMatch[1]}&sz=w800`;
+      if (openMatch) return `https://drive.google.com/thumbnail?id=${openMatch[1]}&sz=w800&v=${IMG_CACHE_BUST}`;
+      const thumbMatch = url.match(/drive\.google\.com\/thumbnail\?id=([a-zA-Z0-9_-]+)/);
+      if (thumbMatch) return `https://drive.google.com/thumbnail?id=${thumbMatch[1]}&sz=w800&v=${IMG_CACHE_BUST}`;
       if (/^https?:\/\//.test(url)) return url;
       return '';
     }
