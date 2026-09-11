@@ -52,6 +52,7 @@
     .sidebar { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 20px; position: sticky; top: 24px; }
     .sidebar h2 { margin: 0 0 16px; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
     .category-list { display: grid; gap: 10px; }
+    .category-row { display: grid; grid-template-columns: 1fr; gap: 10px; }
     .category-item { border-radius: 14px; border: 1px solid var(--line); padding: 12px 14px; background: #fff; color: var(--ink); cursor: pointer; display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 10px; text-align: left; }
     .category-item.active { background: var(--cream-2); border-color: var(--orange); color: var(--orange-dark); }
     .cat-icon { text-align: center; }
@@ -144,8 +145,12 @@
       .sidebar h2 { margin-bottom: 8px; font-size: 13px; }
       .search-box { margin-bottom: 10px; }
       .search-box input { padding: 11px 14px; }
-      .category-list { display: flex; flex-wrap: wrap; gap: 8px; }
-      .category-item { display: flex; align-items: center; gap: 6px; padding: 9px 12px; white-space: nowrap; flex: 0 0 auto; }
+      .category-list { display: grid; gap: 8px; }
+      .category-row { gap: 8px; }
+      .category-row[data-cols="2"] { grid-template-columns: repeat(2, 1fr); }
+      .category-row[data-cols="3"] { grid-template-columns: repeat(3, 1fr); }
+      .category-item { display: flex; align-items: center; gap: 6px; padding: 9px 10px; white-space: nowrap; overflow: hidden; }
+      .category-item .cat-label { overflow: hidden; text-overflow: ellipsis; }
       .menu-content { gap: 14px; }
       .menu-section h3 { padding: 14px 16px; font-size: 16px; }
       .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
@@ -390,10 +395,31 @@
         return true;
       });
     }
+    const CATEGORY_ROWS = [
+      ['BÁNH KEM SINH NHẬT', 'BÁNH SINH NHẬT THIẾT KẾ'],
+      ['BÁNH KEM NHỎ', 'BÁNH MÌ', 'BÁNH QUY']
+    ];
+    function categoryButtonHtml(name, icon, count) {
+      return `<button class="category-item" data-category="${name}"><span class="cat-icon">${icon}</span><span class="cat-label">${name}</span><span class="cat-count">${count}</span></button>`;
+    }
     function renderCategories() {
       const list = document.getElementById('categoryList');
       const categories = getCategories(PRODUCTS_CACHE);
-      list.innerHTML = `<button class="category-item active" data-category="all"><span class="cat-icon"></span><span class="cat-label">Tất cả</span><span class="cat-count">${PRODUCTS_CACHE.length}</span></button>` + categories.map(cat => `<button class="category-item" data-category="${cat.name}"><span class="cat-icon">${NHOM_ICON[cat.name] || '🍰'}</span><span class="cat-label">${cat.name}</span><span class="cat-count">${cat.count}</span></button>`).join('');
+      const byName = {};
+      categories.forEach(cat => { byName[cat.name] = cat; });
+      const used = new Set();
+      let rowsHtml = `<div class="category-row" data-cols="1"><button class="category-item active" data-category="all"><span class="cat-icon"></span><span class="cat-label">Tất cả</span><span class="cat-count">${PRODUCTS_CACHE.length}</span></button></div>`;
+      CATEGORY_ROWS.forEach(rowNames => {
+        const present = rowNames.filter(name => byName[name]);
+        if (!present.length) return;
+        present.forEach(name => used.add(name));
+        rowsHtml += `<div class="category-row" data-cols="${present.length}">${present.map(name => categoryButtonHtml(name, NHOM_ICON[name] || '🍰', byName[name].count)).join('')}</div>`;
+      });
+      const leftover = categories.filter(cat => !used.has(cat.name));
+      if (leftover.length) {
+        rowsHtml += `<div class="category-row" data-cols="1">${leftover.map(cat => categoryButtonHtml(cat.name, NHOM_ICON[cat.name] || '🍰', cat.count)).join('')}</div>`;
+      }
+      list.innerHTML = rowsHtml;
       list.querySelectorAll('.category-item').forEach(item => item.addEventListener('click', () => {
         list.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
