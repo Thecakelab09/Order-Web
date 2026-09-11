@@ -485,7 +485,12 @@
       }
       Object.keys(grouped).forEach(category => {
         if (category === 'BÁNH KEM SINH NHẬT') return;
-        grouped[category] = grouped[category].slice().sort((a, b) => (isPushedToBottom(a) ? 1 : 0) - (isPushedToBottom(b) ? 1 : 0));
+        const tier = (p) => {
+          if (isBestSeller(p)) return 0;
+          if (isPushedToBottom(p)) return 2;
+          return 1;
+        };
+        grouped[category] = grouped[category].slice().sort((a, b) => tier(a) - tier(b));
       });
       const sections = Object.keys(grouped).sort((a,b) => {
         const ia = NHOM_ORDER.indexOf(a); const ib = NHOM_ORDER.indexOf(b);
