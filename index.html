@@ -149,8 +149,11 @@
       .category-row { gap: 8px; }
       .category-row[data-cols="2"] { grid-template-columns: repeat(2, 1fr); }
       .category-row[data-cols="3"] { grid-template-columns: repeat(3, 1fr); }
-      .category-item { display: flex; align-items: center; gap: 6px; padding: 9px 10px; white-space: nowrap; overflow: hidden; }
-      .category-item .cat-label { overflow: hidden; text-overflow: ellipsis; }
+      .category-item { display: flex; align-items: center; gap: 6px; padding: 10px 10px; white-space: normal; }
+      .category-row[data-cols="2"] .category-item, .category-row[data-cols="3"] .category-item { flex-direction: column; text-align: center; gap: 4px; padding: 10px 4px; }
+      .category-row[data-cols="2"] .cat-icon, .category-row[data-cols="3"] .cat-icon { font-size: 16px; }
+      .category-row[data-cols="2"] .cat-label, .category-row[data-cols="3"] .cat-label { font-size: 11.5px; line-height: 1.2; }
+      .category-row[data-cols="2"] .cat-count, .category-row[data-cols="3"] .cat-count { font-size: 11px; }
       .menu-content { gap: 14px; }
       .menu-section h3 { padding: 14px 16px; font-size: 16px; }
       .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
