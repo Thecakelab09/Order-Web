@@ -312,7 +312,7 @@
     const CATEGORY_MERGE = { "ĐỒ ĂN KÈM": "BÁNH MÌ" };
     function categoryOf(product) { const key = product.nhom || 'Khác'; return CATEGORY_MERGE[key] || key; }
     function isSizeCouple(product) { return /size\s*couple/i.test(product.ten || ''); }
-    const BEST_SELLER_CODES = ['10101086', '10101001', '10101007', '10101082', '10101090', '10301032', '10301001', '10302015', '10301023', '10303001', '10501047', '10501002', '10501009', '10501035', '10501001'];
+    const BEST_SELLER_CODES = ['10101086', '10101001', '10101007', '10101082', '10101090', '10301032', '10301001', '10302015', '10301023', '10303001', '10501047', '10501002', '10501009', '10501035', '10501001', '10203003', '10201013', '10201011', '10201055', '10201010'];
     function isBestSeller(product) { return BEST_SELLER_CODES.indexOf(product.ma) !== -1; }
     const PUSH_TO_BOTTOM_CODES = ['10101078', '10401006', '10401009', '10401007'];
     function isPushedToBottom(product) { return PUSH_TO_BOTTOM_CODES.indexOf(product.ma) !== -1; }
