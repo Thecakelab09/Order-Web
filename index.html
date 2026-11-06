@@ -364,7 +364,7 @@
         const goc = byMa[m.ma] || {};
         const coTick = goc.visibility && (goc.visibility.order || goc.visibility.pickup);
         const p = Object.assign({ dvt: '', loai: '' }, macDinh(), coTick ? { stores: goc.stores, visibility: goc.visibility } : {}, {
-          ma: m.ma, ten: m.ten, nhom: m.nhom, img: goc.img || m.img, moi: !!m.moi, bestPoster: !!m.best,
+          ma: m.ma, ten: m.ten, nhom: m.nhom, img: m.anhRieng ? m.img : (goc.img || m.img), moi: !!m.moi, bestPoster: !!m.best,
           dvt: goc.dvt || '', loai: goc.loai || '', mo_ta: m.mo_ta || goc.mo_ta || '',
           gia: m.sizes ? Math.min.apply(null, m.sizes.map(x => x[1])) : m.gia
         });
