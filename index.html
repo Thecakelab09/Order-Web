@@ -178,6 +178,7 @@
     .size-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 120px; padding: 10px 14px; border-radius: 12px; border: 1.5px solid #e5d9cc; background: #fff; cursor: pointer; font: inherit; text-align: left; }
     .size-opt b { font-size: 14px; } .size-opt span { font-size: 13px; color: #b5532a; font-weight: 700; }
     .size-opt.on { border-color: #b5532a; background: #fff4ec; box-shadow: 0 0 0 1px #b5532a inset; }
+    .product-image, .product-grid .product-image { height: auto !important; flex: 0 0 auto !important; aspect-ratio: 1 / 1; }
   </style>
   <!-- Meta Pixel Code -->
   <script>
@@ -247,6 +248,7 @@
       </div>
     </div>
   </div>
+  <script src="menu-hien-tai.js"></script>
   <script>
     const SHEET_ID = '1zerCC76frlLkwu9SysaAix3_Tm1FfWcgQIpvmO7Gsus';
     const SHEET_GID = '1138415008';
@@ -355,6 +357,22 @@
         });
       });
     }
+    // Chỉ hiện bánh đang bán (menu-hien-tai.js). Sheet chỉ dùng để lấy mô tả + tick cửa hàng theo mã món.
+    function apDungMenu(sheetList) {
+      const byMa = {}; sheetList.forEach(p => { byMa[p.ma] = p; });
+      const macDinh = () => ({ stores: { CS1: { pickup: true }, CS2: { pickup: true }, CS4: { pickup: true } }, visibility: { order: true, pickup: true } });
+      return (window.MENU_HIEN_TAI || []).map(m => {
+        const goc = byMa[m.ma] || {};
+        const coTick = goc.visibility && (goc.visibility.order || goc.visibility.pickup);
+        const p = Object.assign({ dvt: '', loai: '' }, macDinh(), coTick ? { stores: goc.stores, visibility: goc.visibility } : {}, {
+          ma: m.ma, ten: m.ten, nhom: m.nhom, img: m.img, moi: !!m.moi, bestPoster: !!m.best,
+          dvt: goc.dvt || '', loai: goc.loai || '', mo_ta: m.mo_ta || goc.mo_ta || '',
+          gia: m.sizes ? Math.min.apply(null, m.sizes.map(x => x[1])) : m.gia
+        });
+        if (m.sizes) p.variants = m.sizes.map(([label, gia, ma]) => Object.assign({}, p, { ma: ma || (m.ma + '-' + label.toLowerCase()), sizeLabel: label, gia, ten: m.ten + ' - Size ' + label, variants: undefined }));
+        return p;
+      });
+    }
     function sizeHienThi(product) {
       const vs = product.variants || [product];
       const loc = vs.filter(v => v.visibility?.[currentTab] && !(currentTab === 'pickup' && currentStore && !v.stores?.[currentStore]?.pickup));
@@ -371,7 +389,7 @@
     function categoryOf(product) { const key = product.nhom || 'Khác'; return CATEGORY_MERGE[key] || key; }
     function isSizeCouple(product) { return (product.variants || [product]).every(v => /size\s*couple/i.test(v.ten || '') || (v.sizeLabel || '').toLowerCase() === 'couple'); }
     const BEST_SELLER_CODES = ['10101086', '10101001', '10101007', '10101082', '10101090', '10301032', '10301001', '10302015', '10301023', '10303001', '10501047', '10501002', '10501009', '10501035', '10501001', '10203003', '10201013', '10201011', '10201055', '10201010', '10101088'];
-    function isBestSeller(product) { return (product.variants || [product]).some(v => BEST_SELLER_CODES.indexOf(v.ma) !== -1); }
+    function isBestSeller(product) { return !!product.bestPoster || (product.variants || [product]).some(v => BEST_SELLER_CODES.indexOf(v.ma) !== -1); }
     const PUSH_TO_BOTTOM_CODES = ['10101078', '10401006', '10401009', '10401007'];
     function isPushedToBottom(product) { return (product.variants || [product]).every(v => PUSH_TO_BOTTOM_CODES.indexOf(v.ma) !== -1); }
     const STORE_LIST = [
@@ -562,7 +580,7 @@
       }).map(category => `<section class="menu-section"><h3>${NHOM_ICON[category] || '🍰'} ${category}</h3><div class="product-grid">${grouped[category].map(product => {
             const imageUrl = product.img || '';
             const imgTag = imageUrl ? `<div class="product-image"><img src="${imageUrl}" alt="${product.ten}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'"></div>` : `<div class="product-image"><span>🍰</span></div>`;
-            const badges = `<div class="card-badges">${isBestSeller(product) ? '<span class="badge bestseller-badge">⭐ Best Seller</span>' : ''}</div>`;
+            const badges = `<div class="card-badges">${product.moi ? '<span class="badge bestseller-badge" style="background:#e23a3a;color:#fff">NEW</span>' : ''}${isBestSeller(product) ? '<span class="badge bestseller-badge">⭐ Best Seller</span>' : ''}</div>`;
             return `<article class="product-card" data-product-id="${product.ma}">${badges}${messengerButtonHtml(product)}${imgTag}<div class="product-info"><h4>${product.ten}</h4><p>${product.mo_ta || product.loai || 'Không có mô tả'}</p></div><div class="product-meta"><span class="tag">${product.dvt || ''}</span><span class="tag">${product.loai || ''}</span></div><div class="product-footer"><div class="product-price">${giaThe(product)}</div>${product.gia === 0 ? contactMessengerBtnHtml(product) : ''}</div></article>`;
           }).join('')}</div></section>`).join('');
       container.innerHTML = sections;
@@ -582,7 +600,7 @@
       if (vs.length > 1) {
         sizesEl.hidden = false;
         sizesEl.innerHTML = '<span class="modal-stores-title">Chọn size:</span><div class="size-opts">' + vs.map((v, i) =>
-          `<button type="button" class="size-opt${i === 0 ? ' on' : ''}" data-i="${i}"><b>Size ${v.sizeLabel}</b><span>${fmtVND(v.gia)}</span></button>`).join('') + '</div>';
+          `<button type="button" class="size-opt${i === 0 ? ' on' : ''}" data-i="${i}"><b>Size ${v.sizeLabel}</b>${(window.SIZE_GHI_CHU || {})[v.sizeLabel] ? `<small style="font-size:12px;color:#7a6a5a">${window.SIZE_GHI_CHU[v.sizeLabel]}</small>` : ''}<span>${fmtVND(v.gia)}</span></button>`).join('') + '</div>';
         sizesEl.querySelectorAll('.size-opt').forEach(b => b.addEventListener('click', () => {
           modalVariant = vs[+b.dataset.i];
           sizesEl.querySelectorAll('.size-opt').forEach(x => x.classList.toggle('on', x === b));
@@ -612,7 +630,7 @@
       try {
         const res = await fetch(SHEET_CSV_URL, { cache: 'no-store' });
         const text = await res.text();
-        PRODUCTS_CACHE = gopSize(rowsToProducts(parseCsv(text))).concat(CUSTOM_CAKES);
+        PRODUCTS_CACHE = apDungMenu(rowsToProducts(parseCsv(text))).concat(CUSTOM_CAKES);
       } catch (err) {
         container.innerHTML = '<div class="empty-state">Không tải được danh sách sản phẩm. Vui lòng tải lại trang.</div>';
         return;
