@@ -178,7 +178,6 @@
     .size-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 120px; padding: 10px 14px; border-radius: 12px; border: 1.5px solid #e5d9cc; background: #fff; cursor: pointer; font: inherit; text-align: left; }
     .size-opt b { font-size: 14px; } .size-opt span { font-size: 13px; color: #b5532a; font-weight: 700; }
     .size-opt.on { border-color: #b5532a; background: #fff4ec; box-shadow: 0 0 0 1px #b5532a inset; }
-    .product-image, .product-grid .product-image { height: auto !important; flex: 0 0 auto !important; aspect-ratio: 1 / 1; }
   </style>
   <!-- Meta Pixel Code -->
   <script>
@@ -365,7 +364,7 @@
         const goc = byMa[m.ma] || {};
         const coTick = goc.visibility && (goc.visibility.order || goc.visibility.pickup);
         const p = Object.assign({ dvt: '', loai: '' }, macDinh(), coTick ? { stores: goc.stores, visibility: goc.visibility } : {}, {
-          ma: m.ma, ten: m.ten, nhom: m.nhom, img: m.img, moi: !!m.moi, bestPoster: !!m.best,
+          ma: m.ma, ten: m.ten, nhom: m.nhom, img: goc.img || m.img, moi: !!m.moi, bestPoster: !!m.best,
           dvt: goc.dvt || '', loai: goc.loai || '', mo_ta: m.mo_ta || goc.mo_ta || '',
           gia: m.sizes ? Math.min.apply(null, m.sizes.map(x => x[1])) : m.gia
         });
