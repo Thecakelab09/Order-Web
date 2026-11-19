@@ -141,7 +141,11 @@
   .tl-store-act { display:flex; gap:6px; margin-top:7px; }
   .tl-store-act a { flex:1; text-align:center; text-decoration:none; border:1px solid rgba(215,38,61,.35); color:var(--tl-red2); border-radius:999px; padding:6px 8px; font-weight:600; font-size:12.5px; }
   .tl-store-act a:hover { background:#fff0f0; }
-  .tl-chips { display:flex; flex-wrap:wrap; gap:6px; padding:4px 12px 10px; }
+  /* Nút gợi ý: lưới 2 cột đều nhau, vừa khung; nút lẻ cuối cùng kéo hết chiều ngang */
+  .tl-chips { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:6px 12px 10px; }
+  .tl-chips:empty { display:none; }
+  .tl-chips .tl-chip { width:100%; min-width:0; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:8px 8px; }
+  .tl-chips .tl-chip:last-child:nth-child(odd) { grid-column:1 / -1; }
   .tl-chip { border:1px solid rgba(215,38,61,.35); background:#fff; color:var(--tl-red2); border-radius:999px; padding:7px 12px; font-size:13px; font-weight:600;
     cursor:pointer; font-family:inherit; transition:background .15s; }
   .tl-chip:hover { background:#fff0f0; }
