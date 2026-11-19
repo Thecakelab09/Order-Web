@@ -106,7 +106,11 @@
   #tl-hint { position:absolute; right:92px; bottom:70px; width:max-content; max-width:230px; background:#fff; border:1px solid var(--tl-line);
     border-radius:16px 16px 4px 16px; padding:10px 28px 10px 13px; font-size:14px; line-height:1.4; box-shadow:0 10px 28px rgba(36,27,18,.18);
     opacity:0; transform:translateY(8px); transition:.25s; pointer-events:none; }
-  #tl-hint.tl-show { opacity:1; transform:none; pointer-events:auto; cursor:pointer; }
+  #tl-hint.tl-show { opacity:1; transform:none; pointer-events:auto; cursor:pointer; animation:tl-nudge 4s ease-in-out 1.5s infinite; }
+  #tl-hint::after { content:""; position:absolute; right:-7px; bottom:14px; width:12px; height:12px; background:#fff;
+    border-right:1px solid var(--tl-line); border-top:1px solid var(--tl-line); transform:rotate(45deg); }
+  #tl-hint:hover { border-color:rgba(215,38,61,.4); }
+  @keyframes tl-nudge { 0%,88%,100%{translate:0 0} 92%{translate:0 -4px} 96%{translate:0 0} }
   #tl-hint .tl-x { position:absolute; top:4px; right:6px; border:0; background:none; color:var(--tl-muted); font-size:16px; cursor:pointer; padding:2px 4px; }
 
   #tl-panel { position:absolute; right:0; bottom:112px; width:360px; max-width:calc(100vw - 24px); height:min(560px, calc(100vh - 150px));
@@ -446,19 +450,21 @@
   // -------------------------------------------------------------------
   let daChao = false;
   function mo() {
-    root.classList.add('tl-open'); an(hint);
-    try { sessionStorage.setItem('tl-hint', '1'); } catch (e) {}
+    root.classList.add('tl-open'); an(hint); clearTimeout(hintT);
     if (!daChao) { daChao = true; chao(); theoDoi('mo'); }
     setTimeout(() => { if (window.innerWidth > 600) input.focus(); }, 250);
   }
-  function dong() { root.classList.remove('tl-open'); }
+  function dong() { root.classList.remove('tl-open'); hintT = setTimeout(hienHint, 5000); } // thu nhỏ một lúc thì hỏi lại
   function an(el) { el.classList.remove('tl-show'); }
   stage.addEventListener('click', () => (root.classList.contains('tl-open') ? dong() : mo()));
   stage.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); stage.click(); } });
   stage.addEventListener('mouseenter', () => { if (emote === 'neutral') camXuc('happy', 1500); });
   $('#tl-close').addEventListener('click', dong);
   $('#tl-reset').addEventListener('click', () => { log.innerHTML = ''; chips.innerHTML = ''; hangDoi = Promise.resolve(); chao(); });
-  hint.addEventListener('click', (e) => { if (e.target.closest('.tl-x')) { an(hint); try { sessionStorage.setItem('tl-hint', '1'); } catch (er) {} } else mo(); });
+  hint.addEventListener('click', (e) => {
+    if (e.target.closest('.tl-x')) { an(hint); tatHint = true; try { sessionStorage.setItem('tl-hint-off', '1'); } catch (er) {} }
+    else mo();
+  });
   $('#tl-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const q = input.value.trim(); if (!q) return;
@@ -467,18 +473,20 @@
   // Mở cửa sổ chi tiết bánh thì thu Tiểu Lộc lại cho khỏi che
   document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('.product-card') && window.innerWidth <= 600) dong(); }, true);
 
-  // Lời chào nhỏ sau vài giây (mỗi phiên một lần)
-  let daHint = false;
-  try { daHint = sessionStorage.getItem('tl-hint') === '1'; } catch (e) {}
-  if (!daHint) {
-    setTimeout(() => {
-      if (root.classList.contains('tl-open')) return;
-      const h = new Date().getHours();
-      const buoi = h < 11 ? 'buổi sáng' : h < 14 ? 'buổi trưa' : h < 18 ? 'buổi chiều' : 'buổi tối';
-      hint.querySelector('span').innerHTML = `Chào ${buoi}! Em là <b>Tiểu Lộc</b> 🐱 Anh/chị cần em tư vấn chọn bánh không ạ?`;
-      hint.classList.add('tl-show'); camXuc('happy', 2500);
-    }, 3500);
+  // Bong bóng hỏi han bên cạnh Tiểu Lộc: luôn hiện khi khung chat đang thu nhỏ.
+  // Khách bấm × thì thôi không hiện nữa trong lần truy cập này.
+  let tatHint = false, hintT = null, lanHint = 0;
+  try { tatHint = sessionStorage.getItem('tl-hint-off') === '1'; } catch (e) {}
+  function hienHint() {
+    if (tatHint || root.classList.contains('tl-open')) return;
+    const h = new Date().getHours();
+    const buoi = h < 11 ? 'buổi sáng' : h < 14 ? 'buổi trưa' : h < 18 ? 'buổi chiều' : 'buổi tối';
+    hint.querySelector('span').innerHTML = lanHint++ === 0
+      ? `Chào ${buoi} ạ! 🐱<br>Anh/chị cần em hỗ trợ gì không ạ?`
+      : 'Anh/chị cần em hỗ trợ gì không ạ? 🐱';
+    hint.classList.add('tl-show'); camXuc('happy', 2500);
   }
+  hintT = setTimeout(hienHint, 2000);
 
   // Thỉnh thoảng liếc mắt cho sinh động
   setInterval(() => {
