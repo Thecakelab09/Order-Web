@@ -12,23 +12,20 @@
   // -------------------------------------------------------------------
   const THONG_TIN = {
     gioMoCua: '',          // vd: '7:00 – 22:00 hằng ngày'
-    hotline: '',           // vd: '0912 345 678'
     giaoHang: '',          // vd: 'Shop giao nội thành Hà Nội, phí theo khoảng cách (qua Grab/Ahamove).'
     thanhToan: '',         // vd: 'Chuyển khoản hoặc tiền mặt khi nhận bánh.'
     datTruoc: '',          // vd: 'Bánh sinh nhật nên đặt trước ít nhất 1 ngày.'
-    diaChi: {              // địa chỉ chi tiết từng cơ sở (để trống nếu chưa có)
-      CS1: '',             // Tuệ Tĩnh
-      CS2: '',             // Times City
-      CS4: '',             // Trung Hòa
-    },
   };
 
   const MESSENGER_URL = 'https://m.me/thecakelabvn?ref=tieuloc';
+  // Các cơ sở (địa chỉ + hotline). Thêm/sửa cơ sở ở đây.
   const CUA_HANG = [
-    { id: 'CS1', ten: 'CS1 — Tuệ Tĩnh' },
-    { id: 'CS2', ten: 'CS2 — Times City' },
-    { id: 'CS4', ten: 'CS4 — Trung Hòa' },
+    { id: 'CS1', ten: 'CS1 — Tuệ Tĩnh', diaChi: '45 Tuệ Tĩnh, Hà Nội', hotline: '034 261 4696', tuKhoa: ['tue tinh', 'cs1'] },
+    { id: 'CS2', ten: 'CS2 — Times City', diaChi: 'SH12, Park 7, Times City, Hà Nội', hotline: '087 657 5365', tuKhoa: ['times city', 'time city', 'timecity', 'park 7', 'cs2'] },
+    { id: 'CS4', ten: 'CS4 — Trung Hòa', diaChi: '26 Trung Hòa, Hà Nội', hotline: '081 372 8034', tuKhoa: ['trung hoa', 'cs4'] },
   ];
+  const banDo = (c) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('The Cake Lab ' + c.diaChi);
+  const goi = (c) => 'tel:' + c.hotline.replace(/\D/g, '');
   const SIZE_NGUOI = { Family: [4, 6], Friends: [6, 8], Party: [8, 12] };
 
   // -------------------------------------------------------------------
@@ -137,6 +134,11 @@
   .tl-card div { padding:7px 8px 9px; font-size:12.5px; line-height:1.3; }
   .tl-card strong { display:block; font-size:12.5px; margin-bottom:3px; }
   .tl-card span { color:var(--tl-red); font-weight:700; }
+  .tl-store { align-self:stretch; background:#fff; border:1px solid var(--tl-line); border-radius:14px; padding:10px 12px; font-size:13.5px; line-height:1.5; }
+  .tl-store strong { display:block; margin-bottom:2px; }
+  .tl-store-act { display:flex; gap:6px; margin-top:7px; }
+  .tl-store-act a { flex:1; text-align:center; text-decoration:none; border:1px solid rgba(215,38,61,.35); color:var(--tl-red2); border-radius:999px; padding:6px 8px; font-weight:600; font-size:12.5px; }
+  .tl-store-act a:hover { background:#fff0f0; }
   .tl-chips { display:flex; flex-wrap:wrap; gap:6px; padding:4px 12px 10px; }
   .tl-chip { border:1px solid rgba(215,38,61,.35); background:#fff; color:var(--tl-red2); border-radius:999px; padding:7px 12px; font-size:13px; font-weight:600;
     cursor:pointer; font-family:inherit; transition:background .15s; }
@@ -240,7 +242,7 @@
     });
   }
   /** Tiểu Lộc trả lời: hiện "đang gõ" một chút cho tự nhiên, rồi hiện chữ + thẻ bánh + nút gợi ý. */
-  function tra(text, { cards = [], options = null, mood = 'happy', size = null } = {}) {
+  function tra(text, { cards = [], options = null, mood = 'happy', size = null, stores = [] } = {}) {
     hangDoi = hangDoi.then(() => new Promise((done) => {
       const typing = document.createElement('div');
       typing.className = 'tl-typing'; typing.innerHTML = '<i></i><i></i><i></i>';
@@ -259,6 +261,13 @@
           });
           log.appendChild(row);
         }
+        stores.forEach((c) => {
+          const box = document.createElement('div'); box.className = 'tl-store';
+          box.innerHTML = `<strong>🏪 ${esc(c.ten)}</strong><div>📍 ${esc(c.diaChi)}</div><div>📞 ${esc(c.hotline)}</div>
+            <div class="tl-store-act"><a href="${banDo(c)}" target="_blank" rel="noopener">📍 Chỉ đường</a><a href="${goi(c)}">📞 Gọi ngay</a></div>`;
+          box.querySelectorAll('a').forEach((a, i) => a.addEventListener('click', () => theoDoi(i ? 'goi_dien' : 'chi_duong', c.id)));
+          log.appendChild(box);
+        });
         cuon(); camXuc(mood);
         if (options) datNut(options);
         done();
@@ -282,7 +291,7 @@
     ['⭐ Bánh bán chạy', bestSeller],
     ['✨ Bánh mới', banhMoi],
     ['📝 Cách đặt bánh', cachDat],
-    ['🏪 Cửa hàng', cuaHang],
+    ['🏪 Cửa hàng', () => cuaHang()],
     ['💬 Gặp nhân viên', gapNhanVien],
   ];
   const NUT_SAU = () => [['🏠 Menu chính', menuChinh], ['💬 Gặp nhân viên', gapNhanVien]];
@@ -332,22 +341,26 @@
   }
   function coSan() {
     tra('Dạ em đã chuyển sang tab **Bánh có sẵn tại cửa hàng** rồi ạ. Ở đây anh/chị chọn cơ sở gần mình để xem bánh đang có, rồi ghé lấy hoặc nhắn shop giữ bánh nhé!',
-      { mood: 'happy', options: [['🏪 Danh sách cửa hàng', cuaHang], ...NUT_SAU()] });
+      { mood: 'happy', options: [['🏪 Danh sách cửa hàng', () => cuaHang()], ...NUT_SAU()] });
   }
   function datTruoc() {
     tra('Dạ em đã chuyển sang tab **Order bánh đặt trước** rồi ạ 📅' + (THONG_TIN.datTruoc ? '\n' + THONG_TIN.datTruoc : '\nAnh/chị chọn bánh rồi nhắn Messenger, nhân viên sẽ tư vấn thời gian nhận bánh phù hợp ạ.'),
       { mood: 'happy', options: [['🎂 Gợi ý bánh sinh nhật', hoiSoNguoi], ...NUT_SAU()] });
   }
-  function cuaHang() {
-    const ds = CUA_HANG.map((c) => `• **${c.ten}**${THONG_TIN.diaChi[c.id] ? ' — ' + THONG_TIN.diaChi[c.id] : ''}`).join('\n');
-    tra(`Dạ The Cake Lab có ${CUA_HANG.length} cơ sở ạ:\n${ds}` + (THONG_TIN.gioMoCua ? `\n🕐 Giờ mở cửa: ${THONG_TIN.gioMoCua}` : '') +
-      '\nỞ tab “Bánh có sẵn tại cửa hàng”, anh/chị chọn cơ sở để xem bánh đang có ở đó ạ.',
-      { mood: 'happy', options: [['🏪 Xem bánh có sẵn', () => { chuyenTab('pickup'); coSan(); }], ...NUT_SAU()] });
+  function cuaHang(chiMot) {
+    const ds = chiMot ? [chiMot] : CUA_HANG;
+    tra((chiMot ? `Dạ đây là cơ sở **${chiMot.ten}** ạ:` : `Dạ The Cake Lab có ${CUA_HANG.length} cơ sở ạ:`) +
+      (THONG_TIN.gioMoCua ? `\n🕐 Giờ mở cửa: ${THONG_TIN.gioMoCua}` : ''),
+      { stores: ds, mood: 'happy', options: [['🏪 Xem bánh có sẵn', () => { chuyenTab('pickup'); coSan(); }], ...NUT_SAU()] });
+  }
+  function goiDien() {
+    tra('Dạ anh/chị gọi cơ sở gần mình nhất nhé ạ 📞', { stores: CUA_HANG, mood: 'happy', options: [['💬 Nhắn Messenger', gapNhanVien], ['🏠 Menu chính', menuChinh]] });
   }
   function gapNhanVien() {
     theoDoi('gap_nhan_vien');
-    tra('Dạ em mở Messenger để anh/chị nhắn trực tiếp với nhân viên The Cake Lab nhé ạ 💬' + (THONG_TIN.hotline ? `\nHoặc gọi hotline: **${THONG_TIN.hotline}**` : ''),
-      { mood: 'love', options: [['💬 Mở Messenger', () => window.open(MESSENGER_URL, '_blank', 'noopener'), true], ['🏠 Menu chính', menuChinh]] });
+    tra('Dạ em mở Messenger để anh/chị nhắn trực tiếp với nhân viên The Cake Lab nhé ạ 💬\nAnh/chị cũng có thể gọi hotline của từng cơ sở:',
+      { mood: 'love', options: [['💬 Mở Messenger', () => window.open(MESSENGER_URL, '_blank', 'noopener'), true], ['📍 Địa chỉ cửa hàng', () => cuaHang()], ['🏠 Menu chính', menuChinh]],
+        stores: CUA_HANG });
     setTimeout(() => window.open(MESSENGER_URL, '_blank', 'noopener'), 900);
   }
   function hoiShop(chuDe, thongTin) {
@@ -380,7 +393,10 @@
       if (n > 12) return tiecLon();
       return goiYSize(n <= 6 ? 'Family' : n <= 8 ? 'Friends' : 'Party', n);
     }
-    const banh = timBanh(q);
+    // Tên cơ sở (vd "Trung Hòa") không được đem đi so với tên bánh (vd "Hoa Quả")
+    const coSo = CUA_HANG.find((c) => c.tuKhoa.some((k) => t.includes(k)));
+    const qBanh = CUA_HANG.reduce((x, c) => c.tuKhoa.reduce((y, k) => y.split(k).join(' '), x), t);
+    const banh = timBanh(qBanh);
     if (banh.length) {
       const m = banh[0];
       const gia = m.sizes ? m.sizes.map(([s, g]) => `${s} (${SIZE_NGUOI[s] ? SIZE_NGUOI[s].join('–') + ' người' : s}): **${fmt(g)}**`).join('\n') : `Giá: **${fmt(m.gia)}**`;
@@ -390,11 +406,13 @@
     }
     if (co(' chao', 'hello', ' hi ', ' alo', 'xin chao')) return chao();
     if (co('cam on', 'thank', 'tks', 'camon')) return tra('Dạ không có gì ạ! Chúc anh/chị một ngày thật nhiều may mắn và tài lộc 🐱💕', { mood: 'love', options: NUT_SAU() });
-    if (co('nhan vien', 'tu van vien', 'nguoi that', 'admin', 'messenger', 'inbox', 'goi dien', 'hotline', 'so dien thoai', 'sdt')) return gapNhanVien();
+    if (co('hotline', 'so dien thoai', 'sdt', 'goi dien', 'dien thoai', 'so dt')) return coSo ? cuaHang(coSo) : goiDien();
+    if (coSo) return cuaHang(coSo);
+    if (co('nhan vien', 'tu van vien', 'nguoi that', 'admin', 'messenger', 'inbox')) return gapNhanVien();
     if (co('giao', 'ship', 'van chuyen', 'grab', 'ahamove')) return hoiShop('giao hàng và phí ship', THONG_TIN.giaoHang);
     if (co('thanh toan', 'chuyen khoan', 'tien mat', ' ck ', 'stk', 'tai khoan')) return hoiShop('cách thanh toán', THONG_TIN.thanhToan);
     if (co('gio mo', 'mo cua', 'dong cua', 'may gio', 'gio lam')) return hoiShop('giờ mở cửa', THONG_TIN.gioMoCua ? `cửa hàng mở ${THONG_TIN.gioMoCua} ạ 🕐` : '');
-    if (co('dia chi', 'cua hang', 'co so', 'chi nhanh', ' o dau', 'times city', 'tue tinh', 'trung hoa', 'cs1', 'cs2', 'cs4')) return cuaHang();
+    if (co('dia chi', 'cua hang', 'co so', 'chi nhanh', ' o dau', 'duong di', 'chi duong', 'ban do', 'map')) return cuaHang();
     if (co('dat truoc', 'truoc may ngay', 'bao lau', 'mat bao lau', 'order truoc')) return datTruoc();
     if (co('co san', 'lay ngay', 'mua ngay', 'lay luon')) { chuyenTab('pickup'); return coSan(); }
     if (co('cach dat', 'dat banh', 'dat hang', 'order', 'mua banh', 'dat nhu the nao', 'huong dan')) return cachDat();
