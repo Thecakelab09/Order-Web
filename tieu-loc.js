@@ -12,6 +12,7 @@
   // -------------------------------------------------------------------
   const THONG_TIN = {
     gioMoCua: '',          // vd: '7:00 – 22:00 hằng ngày'
+    hotlineOnline: '096 698 6960', // số điện thoại đặt hàng online
     giaoHang: '',          // vd: 'Shop giao nội thành Hà Nội, phí theo khoảng cách (qua Grab/Ahamove).'
     thanhToan: '',         // vd: 'Chuyển khoản hoặc tiền mặt khi nhận bánh.'
     datTruoc: '',          // vd: 'Bánh sinh nhật nên đặt trước ít nhất 1 ngày.'
@@ -136,6 +137,7 @@
   .tl-card span { color:var(--tl-red); font-weight:700; }
   .tl-store { align-self:stretch; background:#fff; border:1px solid var(--tl-line); border-radius:14px; padding:10px 12px; font-size:13.5px; line-height:1.5; }
   .tl-store strong { display:block; margin-bottom:2px; }
+  .tl-online { background:#fff6f0; border-color:rgba(215,38,61,.3); }
   .tl-store-act { display:flex; gap:6px; margin-top:7px; }
   .tl-store-act a { flex:1; text-align:center; text-decoration:none; border:1px solid rgba(215,38,61,.35); color:var(--tl-red2); border-radius:999px; padding:6px 8px; font-weight:600; font-size:12.5px; }
   .tl-store-act a:hover { background:#fff0f0; }
@@ -242,7 +244,7 @@
     });
   }
   /** Tiểu Lộc trả lời: hiện "đang gõ" một chút cho tự nhiên, rồi hiện chữ + thẻ bánh + nút gợi ý. */
-  function tra(text, { cards = [], options = null, mood = 'happy', size = null, stores = [] } = {}) {
+  function tra(text, { cards = [], options = null, mood = 'happy', size = null, stores = [], online = false } = {}) {
     hangDoi = hangDoi.then(() => new Promise((done) => {
       const typing = document.createElement('div');
       typing.className = 'tl-typing'; typing.innerHTML = '<i></i><i></i><i></i>';
@@ -260,6 +262,13 @@
             row.appendChild(b);
           });
           log.appendChild(row);
+        }
+        if (online && THONG_TIN.hotlineOnline) {
+          const box = document.createElement('div'); box.className = 'tl-store tl-online';
+          box.innerHTML = `<strong>🛒 Đặt hàng online</strong><div>📞 ${esc(THONG_TIN.hotlineOnline)}</div>
+            <div class="tl-store-act"><a href="tel:${THONG_TIN.hotlineOnline.replace(/\D/g, '')}">📞 Gọi đặt hàng</a><a href="${MESSENGER_URL}" target="_blank" rel="noopener">💬 Messenger</a></div>`;
+          box.querySelectorAll('a').forEach((a, i) => a.addEventListener('click', () => theoDoi(i ? 'messenger' : 'goi_online')));
+          log.appendChild(box);
         }
         stores.forEach((c) => {
           const box = document.createElement('div'); box.className = 'tl-store';
@@ -336,16 +345,16 @@
     tra(loi + ` (${ds.length} loại)`, { cards: ds, mood: 'happy', options: NUT_SAU() });
   }
   function cachDat() {
-    tra('Dạ đặt bánh rất đơn giản ạ:\n**1.** Chọn tab **“Bánh có sẵn tại cửa hàng”** (mua lấy ngay) hoặc **“Order bánh đặt trước”**.\n**2.** Bấm vào bánh anh/chị thích, chọn size.\n**3.** Bấm **“Nhắn tin đặt bánh này qua Messenger”** — nội dung tin nhắn đã được chép sẵn, anh/chị chỉ cần **dán và gửi** là xong ạ! 📋\nNhân viên sẽ trả lời và xác nhận đơn cho anh/chị.',
-      { mood: 'proud', options: [['🏪 Bánh có sẵn tại cửa hàng', () => { chuyenTab('pickup'); coSan(); }], ['📅 Đặt bánh trước', () => { chuyenTab('order'); datTruoc(); }], ...NUT_SAU()] });
+    tra('Dạ đặt bánh rất đơn giản ạ:\n**1.** Chọn tab **“Bánh có sẵn tại cửa hàng”** (mua lấy ngay) hoặc **“Order bánh đặt trước”**.\n**2.** Bấm vào bánh anh/chị thích, chọn size.\n**3.** Bấm **“Nhắn tin đặt bánh này qua Messenger”** — nội dung tin nhắn đã được chép sẵn, anh/chị chỉ cần **dán và gửi** là xong ạ! 📋\nNhân viên sẽ trả lời và xác nhận đơn cho anh/chị.\nHoặc anh/chị gọi thẳng **số đặt hàng online** bên dưới ạ:',
+      { online: true, mood: 'proud', options: [['🏪 Bánh có sẵn tại cửa hàng', () => { chuyenTab('pickup'); coSan(); }], ['📅 Đặt bánh trước', () => { chuyenTab('order'); datTruoc(); }], ...NUT_SAU()] });
   }
   function coSan() {
     tra('Dạ em đã chuyển sang tab **Bánh có sẵn tại cửa hàng** rồi ạ. Ở đây anh/chị chọn cơ sở gần mình để xem bánh đang có, rồi ghé lấy hoặc nhắn shop giữ bánh nhé!',
       { mood: 'happy', options: [['🏪 Danh sách cửa hàng', () => cuaHang()], ...NUT_SAU()] });
   }
   function datTruoc() {
-    tra('Dạ em đã chuyển sang tab **Order bánh đặt trước** rồi ạ 📅' + (THONG_TIN.datTruoc ? '\n' + THONG_TIN.datTruoc : '\nAnh/chị chọn bánh rồi nhắn Messenger, nhân viên sẽ tư vấn thời gian nhận bánh phù hợp ạ.'),
-      { mood: 'happy', options: [['🎂 Gợi ý bánh sinh nhật', hoiSoNguoi], ...NUT_SAU()] });
+    tra('Dạ em đã chuyển sang tab **Order bánh đặt trước** rồi ạ 📅' + (THONG_TIN.datTruoc ? '\n' + THONG_TIN.datTruoc : '\nAnh/chị chọn bánh rồi nhắn Messenger hoặc gọi số đặt hàng online, nhân viên sẽ tư vấn thời gian nhận bánh phù hợp ạ.'),
+      { online: true, mood: 'happy', options: [['🎂 Gợi ý bánh sinh nhật', hoiSoNguoi], ...NUT_SAU()] });
   }
   function cuaHang(chiMot) {
     const ds = chiMot ? [chiMot] : CUA_HANG;
@@ -354,18 +363,18 @@
       { stores: ds, mood: 'happy', options: [['🏪 Xem bánh có sẵn', () => { chuyenTab('pickup'); coSan(); }], ...NUT_SAU()] });
   }
   function goiDien() {
-    tra('Dạ anh/chị gọi cơ sở gần mình nhất nhé ạ 📞', { stores: CUA_HANG, mood: 'happy', options: [['💬 Nhắn Messenger', gapNhanVien], ['🏠 Menu chính', menuChinh]] });
+    tra('Dạ muốn **đặt bánh** thì anh/chị gọi số đặt hàng online ạ 📞 Còn hỏi bánh có sẵn thì gọi cơ sở gần mình nhất nhé:', { online: true, stores: CUA_HANG, mood: 'happy', options: [['💬 Nhắn Messenger', gapNhanVien], ['🏠 Menu chính', menuChinh]] });
   }
   function gapNhanVien() {
     theoDoi('gap_nhan_vien');
-    tra('Dạ em mở Messenger để anh/chị nhắn trực tiếp với nhân viên The Cake Lab nhé ạ 💬\nAnh/chị cũng có thể gọi hotline của từng cơ sở:',
+    tra('Dạ em mở Messenger để anh/chị nhắn trực tiếp với nhân viên The Cake Lab nhé ạ 💬\nAnh/chị cũng có thể gọi số đặt hàng online hoặc hotline từng cơ sở:',
       { mood: 'love', options: [['💬 Mở Messenger', () => window.open(MESSENGER_URL, '_blank', 'noopener'), true], ['📍 Địa chỉ cửa hàng', () => cuaHang()], ['🏠 Menu chính', menuChinh]],
-        stores: CUA_HANG });
+        online: true, stores: CUA_HANG });
     setTimeout(() => window.open(MESSENGER_URL, '_blank', 'noopener'), 900);
   }
   function hoiShop(chuDe, thongTin) {
     if (thongTin) return tra(`Dạ ${thongTin}`, { mood: 'happy', options: NUT_SAU() });
-    tra(`Dạ về ${chuDe}, anh/chị nhắn shop qua Messenger để nhân viên báo chính xác nhất ạ 💬`, { mood: 'shy', options: [['💬 Nhắn shop', gapNhanVien, true], ['🏠 Menu chính', menuChinh]] });
+    tra(`Dạ về ${chuDe}, anh/chị nhắn Messenger hoặc gọi số đặt hàng online để nhân viên báo chính xác nhất ạ 💬`, { online: true, mood: 'shy', options: [['💬 Nhắn shop', gapNhanVien, true], ['🏠 Menu chính', menuChinh]] });
   }
 
   // Tìm bánh theo tên khách gõ
@@ -406,6 +415,7 @@
     }
     if (co(' chao', 'hello', ' hi ', ' alo', 'xin chao')) return chao();
     if (co('cam on', 'thank', 'tks', 'camon')) return tra('Dạ không có gì ạ! Chúc anh/chị một ngày thật nhiều may mắn và tài lộc 🐱💕', { mood: 'love', options: NUT_SAU() });
+    if (co('dat hang online', 'so dat hang', 'dt dat hang', 'dien thoai dat', 'online')) return goiDien();
     if (co('hotline', 'so dien thoai', 'sdt', 'goi dien', 'dien thoai', 'so dt')) return coSo ? cuaHang(coSo) : goiDien();
     if (coSo) return cuaHang(coSo);
     if (co('nhan vien', 'tu van vien', 'nguoi that', 'admin', 'messenger', 'inbox')) return gapNhanVien();
