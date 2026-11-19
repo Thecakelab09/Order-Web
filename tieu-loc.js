@@ -169,7 +169,6 @@
         <div class="tl-av">${CAT_SVG}</div>
         <div><b>Tiểu Lộc</b><small>Hướng dẫn viên The Cake Lab</small></div>
         <div class="tl-hbtn">
-          <button type="button" id="tl-voice" title="Bật đọc thành tiếng" hidden>🔇</button>
           <button type="button" id="tl-reset" title="Bắt đầu lại">↺</button>
           <button type="button" id="tl-close" title="Thu nhỏ">✕</button>
         </div>
@@ -228,34 +227,6 @@
   ve();
 
   // -------------------------------------------------------------------
-  // Đọc thành tiếng (tuỳ chọn, mặc định tắt; chỉ hiện nút khi máy có giọng tiếng Việt)
-  // -------------------------------------------------------------------
-  let giongViet = null, docTo = false;
-  const voiceBtn = $('#tl-voice');
-  function timGiong() {
-    if (!('speechSynthesis' in window)) return;
-    giongViet = speechSynthesis.getVoices().find((v) => /^vi/i.test(v.lang)) || null;
-    voiceBtn.hidden = !giongViet;
-  }
-  if ('speechSynthesis' in window) { timGiong(); speechSynthesis.onvoiceschanged = timGiong; }
-  voiceBtn.addEventListener('click', () => {
-    docTo = !docTo;
-    voiceBtn.textContent = docTo ? '🔊' : '🔇';
-    voiceBtn.title = docTo ? 'Tắt đọc thành tiếng' : 'Bật đọc thành tiếng';
-    if (!docTo) speechSynthesis.cancel(); else noi('Dạ, Tiểu Lộc sẽ đọc cho anh chị nghe ạ.');
-  });
-  function noi(text) {
-    if (!docTo || !giongViet) return;
-    speechSynthesis.cancel();
-    const t = String(text).replace(/\*\*/g, '').replace(/\p{Extended_Pictographic}|️/gu, '').replace(/\n+/g, '. ');
-    const u = new SpeechSynthesisUtterance(t);
-    u.voice = giongViet; u.lang = giongViet.lang; u.pitch = 1.35; u.rate = 1.05;
-    u.onstart = () => { talking = true; ve(); };
-    u.onend = u.onerror = () => { talking = false; ve(); };
-    speechSynthesis.speak(u);
-  }
-
-  // -------------------------------------------------------------------
   // Hiển thị tin nhắn
   // -------------------------------------------------------------------
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -288,7 +259,7 @@
           });
           log.appendChild(row);
         }
-        cuon(); camXuc(mood); noi(text);
+        cuon(); camXuc(mood);
         if (options) datNut(options);
         done();
       }, Math.min(1100, 350 + text.length * 6));
@@ -448,7 +419,7 @@
     if (!daChao) { daChao = true; chao(); theoDoi('mo'); }
     setTimeout(() => { if (window.innerWidth > 600) input.focus(); }, 250);
   }
-  function dong() { root.classList.remove('tl-open'); if ('speechSynthesis' in window) speechSynthesis.cancel(); }
+  function dong() { root.classList.remove('tl-open'); }
   function an(el) { el.classList.remove('tl-show'); }
   stage.addEventListener('click', () => (root.classList.contains('tl-open') ? dong() : mo()));
   stage.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); stage.click(); } });
